@@ -1,0 +1,39 @@
+version: '2.1'
+
+services:
+  nginx:
+    image: openresty/openresty:xenial
+    volumes:
+      - "./nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf"
+      - "./src/:/lua/src/"
+      - "./media:/media"
+    ports:
+      - "8080:8080"
+
+  test:
+    command: busted -c
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ".:/lua/"
+    working_dir: "/lua"
+
+  coverage:
+    command: luacov-coveralls -v
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ".:/lua/"
+    working_dir: "/lua"
+
+  lint:
+    command: bash -c "luacheck -q ."
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ".:/lua/"
+    working_dir: "/lua"
+
