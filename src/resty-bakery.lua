@@ -32,7 +32,6 @@ end
 
 -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
 bakery.hls.bandwidth = function(raw, context)
-  context = bakery.set_default_context(context)
   local filtered_manifest = {}
   local manifest_lines = bakery.split(raw, "\n")
   local filtered = false
