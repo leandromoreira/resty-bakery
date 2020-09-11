@@ -22,9 +22,6 @@ end
 --
 
 bakery.hls = {}
-bakery.hls.filters = {
-  {name="bandwidth", order=0},
-}
 
 bakery.set_default_context = function(context)
   if not context.max then context.max = math.huge end
@@ -77,5 +74,39 @@ bakery.hls.bandwidth = function(raw, context)
   local raw_filtered_manifest = table.concat(filtered_manifest,"\n") .. "\n"
   return raw_filtered_manifest, nil
 end
+
+
+bakery.filter = function(uri, body)
+  local filters = {}
+  if string.match(uri, ".m3u8") then
+    filters = bakery.hls.filters
+  end
+  -- TOOD mpd
+
+  for _, v in ipairs(filters) do
+    if string.match(uri, v.match) then
+      -- we're assuming no error at all
+      -- and when an error happens the
+      -- filters should return the unmodified body
+      body = v.filter(body, bakery.set_default_context(v.context_args(uri)))
+    end
+  end
+
+  return body
+end
+
+local hls_bandwidth_args = function(uri)
+  local min, max = string.match(uri, "(%d+),?(%d*)")
+  local context = {}
+  if min then context.min = tonumber(min) end
+  if max then context.max = tonumber(max) end
+  return context
+end
+-- do we need to care wether it's a variant or a master?
+-- do we care about the order?
+bakery.hls.filters = {
+  -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
+  {name="bandwidth", filter=bakery.hls.bandwidth, match="b%(%d+,?%d*%)", context_args=hls_bandwidth_args},
+}
 
 return bakery
