@@ -3,9 +3,9 @@
 #EXT-X-TARGETDURATION:4
 #EXT-X-MEDIA-SEQUENCE:0
 #EXTINF:4.166667,
-variant_30.ts
+variant_00.ts
 #EXTINF:4.166667,
-variant_31.ts
+variant_01.ts
 #EXTINF:1.666667,
-variant_32.ts
+variant_02.ts
 #EXT-X-ENDLIST

@@ -2,65 +2,92 @@ package.path = package.path .. ";spec/?.lua"
 
 local bakery = require "resty-bakery"
 
-local variant_header =[[#EXTM3U
-#EXT-X-VERSION:4
-#EXT-X-MEDIA:TYPE=CLOSED-CAPTIONS,GROUP-ID="CC",NAME="ENGLISH",DEFAULT=NO,LANGUAGE="ENG"
-]]
--- luacheck: ignore
-local variant_avc1_4000kbs_29fps =[[#EXT-X-STREAM-INF:PROGRAM-ID=0,BANDWIDTH=4000,AVERAGE-BANDWIDTH=4000,CODECS="ac-3,avc",RESOLUTION=1920x1080,FRAME-RATE=29.97
-http://existing.base/uri/link_1.m3u8
-]]
-local variant_avc1_2000kbs_29fps =[[#EXT-X-STREAM-INF:PROGRAM-ID=0,BANDWIDTH=2000,AVERAGE-BANDWIDTH=2000,CODECS="ac-3,avc",RESOLUTION=1280x720,FRAME-RATE=29.97
-http://existing.base/uri/link_2.m3u8
-]]
-local variant_avc1_1000kbs_29fps =[[#EXT-X-STREAM-INF:PROGRAM-ID=0,BANDWIDTH=1000,AVERAGE-BANDWIDTH=1000,CODECS="ac-3,avc",RESOLUTION=640x360,FRAME-RATE=29.97
-http://existing.base/uri/link_3.m3u8
-]]
-local variant = variant_header .. variant_avc1_4000kbs_29fps .. variant_avc1_2000kbs_29fps .. variant_avc1_1000kbs_29fps
+local content_from = function(file)
+  local f = assert(io.open(file, "rb"))
+  local content = f:read("*a")
+  f:close()
+  return content
+end
+
+-- add tests over variant shouldn't change
+local ffmpeg_master = content_from("spec/manifests/ffmpeg_master.m3u8")
+
+local bandwidth_tests = {
+  {
+    name="defines a minimum bitrate from FFmpeg", filter=bakery.hls.bandwidth, manifest=ffmpeg_master, context={min=1500000, max=math.huge},
+    check=function(modified_manifest)
+      local rendition_count = 0
+      for w in string.gmatch(modified_manifest, "(BANDWIDTH=%d+)") do
+        rendition_count = rendition_count + 1
+      end
+      local not_present = string.match(modified_manifest, "BANDWIDTH=800000") == nil
+
+      assert.is_true(not_present, "the rendtion 800000 should not be present")
+      assert.is.equals(2, rendition_count, "there should have only two renditions where bitrate >= 1500000")
+    end,
+  },
+  {
+    name="defines a maximum bitrate from FFmpeg", filter=bakery.hls.bandwidth, manifest=ffmpeg_master, context={min=0, max=1500000},
+    check=function(modified_manifest)
+      local rendition_count = 0
+      for w in string.gmatch(modified_manifest, "(BANDWIDTH=%d+)") do
+        rendition_count = rendition_count + 1
+      end
+      local not_present = string.match(modified_manifest, "BANDWIDTH=2000000") == nil
+
+      assert.is_true(not_present, "the rendtion 2000000 should not be present")
+      assert.is.equals(3, rendition_count, "there should have only three renditions where bitrate <= 1500000")
+    end,
+  },
+  {
+    name="defines a minimum and maximum bitrate from FFmpeg", filter=bakery.hls.bandwidth, manifest=ffmpeg_master, context={min=1500000, max=1500000},
+    check=function(modified_manifest)
+      local rendition_count = 0
+      for w in string.gmatch(modified_manifest, "(BANDWIDTH=%d+)") do
+        rendition_count = rendition_count + 1
+      end
+      local not_present = string.match(modified_manifest, "BANDWIDTH=2000000") == nil
+
+      assert.is_true(not_present, "the rendtion 2000000 should not be present")
+      assert.is.equals(1, rendition_count, "there should have only one rendition where bitrate = 1500000")
+    end,
+  },
+  {
+    name="returns all renditions when all renditions are filtered from FFmpeg", filter=bakery.hls.bandwidth, manifest=ffmpeg_master, context={min=1500, max=1500},
+    check=function(modified_manifest)
+      local rendition_count = 0
+      for w in string.gmatch(modified_manifest, "(BANDWIDTH=%d+)") do
+        rendition_count = rendition_count + 1
+      end
+
+      assert.is.equals(4, rendition_count, "there should have only one rendition where bitrate = 1500000")
+    end,
+  },
+  {
+    name="returns all renditions when no context is passed from FFmpeg", filter=bakery.hls.bandwidth, manifest=ffmpeg_master, context={},
+    check=function(modified_manifest)
+      local rendition_count = 0
+      for w in string.gmatch(modified_manifest, "(BANDWIDTH=%d+)") do
+        rendition_count = rendition_count + 1
+      end
+
+      assert.is.equals(4, rendition_count, "there should have only one rendition where bitrate = 1500000")
+    end,
+  },
+}
 
 describe("Resty Bakery", function()
   describe("HLS", function()
 
     -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
     describe("Bandwidth", function()
-      it("defines a minimum bitrate", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {min=2000,max=math.huge})
-        local expected_variant = variant_header .. variant_avc1_4000kbs_29fps .. variant_avc1_2000kbs_29fps
+      for _, test in ipairs(bandwidth_tests) do
+        it(test.name, function()
+          local modified_manifest = test.filter(test.manifest, test.context)
 
-        assert.is_nil(err)
-        assert.same(expected_variant, modified_variant)
-      end)
-
-      it("defines a maximum bitrate", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {min=0,max=2000})
-        local expected_variant = variant_header .. variant_avc1_2000kbs_29fps .. variant_avc1_1000kbs_29fps
-
-        assert.is_nil(err)
-        assert.same(expected_variant, modified_variant)
-      end)
-
-      it("defines a minimum and maximum bitrate", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {min=2000, max=2000})
-        local expected_variant = variant_header .. variant_avc1_2000kbs_29fps
-
-        assert.is_nil(err)
-        assert.same(expected_variant, modified_variant)
-      end)
-
-      it("returns all renditions when all renditions are filtered", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {min=2500, max=2500})
-
-        assert.is_nil(err)
-        assert.same(variant, modified_variant)
-      end)
-
-      it("returns all rendition when there is no max and min constraint", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {})
-
-        assert.is_not_nil(err)
-        assert.same(variant, modified_variant)
-      end)
+          test.check(modified_manifest)
+        end)
+      end
     end)
-
   end)
 end)

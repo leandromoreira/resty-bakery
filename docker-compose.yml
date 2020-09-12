@@ -6,7 +6,7 @@ services:
     volumes:
       - "./nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf"
       - "./src/:/lua/src/"
-      - "./media:/media"
+      - "./spec/manifests:/media"
     ports:
       - "8080:8080"
 
