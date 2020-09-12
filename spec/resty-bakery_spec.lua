@@ -24,7 +24,7 @@ describe("Resty Bakery", function()
     -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
     describe("Bandwidth", function()
       it("defines a minimum bitrate", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {min=2000})
+        local modified_variant, err = bakery.hls.bandwidth(variant, {min=2000,max=math.huge})
         local expected_variant = variant_header .. variant_avc1_4000kbs_29fps .. variant_avc1_2000kbs_29fps
 
         assert.is_nil(err)
@@ -32,7 +32,7 @@ describe("Resty Bakery", function()
       end)
 
       it("defines a maximum bitrate", function()
-        local modified_variant, err = bakery.hls.bandwidth(variant, {max=2000})
+        local modified_variant, err = bakery.hls.bandwidth(variant, {min=0,max=2000})
         local expected_variant = variant_header .. variant_avc1_2000kbs_29fps .. variant_avc1_1000kbs_29fps
 
         assert.is_nil(err)
@@ -53,10 +53,11 @@ describe("Resty Bakery", function()
         assert.is_nil(err)
         assert.same(variant, modified_variant)
       end)
+
       it("returns all rendition when there is no max and min constraint", function()
         local modified_variant, err = bakery.hls.bandwidth(variant, {})
 
-        assert.is_nil(err)
+        assert.is_not_nil(err)
         assert.same(variant, modified_variant)
       end)
     end)
