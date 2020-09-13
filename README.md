@@ -6,7 +6,42 @@ An Nginx+Lua library to modify media manifests like HLS and MPEG Dash, acting li
 
 * [**Bandwidth**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md) (/path/to/media/f/`b(min,max)`/manifes.m3u8) - filters based on uri path following the format `b(min bandwidth, max bandwidth)`.
 
-# Run locally
+# Nginx usage example
+
+
+```nginx
+# Let's suppose our origin hosts media at /media/<manifest>.<extension>
+# So what we need to do is to set up a location to act like a proxy
+# Also, let's say we're going to use /media/<filters>/<manifest>.<extension> to pass the filters
+#  ex: /media/b(1500000)/playlist.m3u8
+    location /media {
+        proxy_pass http://origin;
+
+        # we need to keep the original uri with its state, since we're going to rewrite
+        # from /media/<filters>/<manifest>.<extension> to /media/<manifest>.<extension>
+        set_by_lua_block $original_uri { return ngx.var.uri }
+
+        # when the Lua code may change the length of the response body,
+        # then it is required to always clear out the Content-Length
+        header_filter_by_lua_block { ngx.header.content_length = nil }
+
+        # rewriting to the proper origin uri, effectively removing the filters
+        rewrite_by_lua_block {
+          local uri = ngx.re.sub(ngx.var.uri, "^/media/(.*)/(.*)$", "/media/$2")
+          ngx.req.set_uri(uri)
+        }
+
+        # applying the filters (after the proxy/upstream has responded)
+        # here is where the magic happens
+        body_filter_by_lua_block {
+          local modified_manifest = bakery.filter(ngx.var.original_uri, ngx.arg[1])
+          ngx.arg[1] = modified_manifest
+          ngx.arg[2] = true
+        }
+    }
+```
+
+# Test locally
 
 ```bash
 make run
