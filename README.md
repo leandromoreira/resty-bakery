@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/leandromoreira/resty-bakery.svg?branch=master)](https://travis-ci.org/leandromoreira/resty-bakery) [![license](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)
+
 # Resty-Bakery [WIP] strongly inspired by [Bakery](https://github.com/cbsinteractive/bakery)
 
 An Nginx+Lua library to modify media manifests like HLS and MPEG Dash, acting like a proxy. Today we're filtering:
