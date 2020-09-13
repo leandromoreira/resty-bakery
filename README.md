@@ -1,10 +1,10 @@
-# Resty-Bakery [WIP] strongly inspired by https://github.com/cbsinteractive/bakery
+# Resty-Bakery [WIP] strongly inspired by [Bakery](https://github.com/cbsinteractive/bakery)
 
-A Nginx+Lua library to modify media manifests like HLS and MPEG Dash, filtering:
+An Nginx+Lua library to modify media manifests like HLS and MPEG Dash, acting like a proxy. Today we're filtering:
 
-* Bandwidth
+* Bandwidth (/path/to/media/f/b(min,max)/manifes.m3u8)
 
-# Running locally
+# Run locally
 
 ```bash
 make run
