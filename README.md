@@ -4,7 +4,7 @@
 
 An Nginx+Lua library to modify media manifests like HLS and MPEG Dash, acting like a proxy between (or in) the `frontend` and the `origin`, currently we're filtering:
 
-* **Bandwidth** (/path/to/media/f/`b(min,max)`/manifes.m3u8) - filters based on uri path following the format `b(min bandwidth, max bandwidth)`.
+* [**Bandwidth**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md) (/path/to/media/f/`b(min,max)`/manifes.m3u8) - filters based on uri path following the format `b(min bandwidth, max bandwidth)`.
 
 # Run locally
 
