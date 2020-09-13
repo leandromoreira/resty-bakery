@@ -22,7 +22,7 @@ local bandwidth_tests = {
       end
       local not_present = string.match(modified_manifest, "BANDWIDTH=800000") == nil
 
-      assert.is_true(not_present, "the rendtion 800000 should not be present")
+      assert.is_true(not_present, "the rendition 800000 should not be present")
       assert.is.equals(2, rendition_count, "there should have only two renditions where bitrate >= 1500000")
     end,
   },
@@ -35,7 +35,7 @@ local bandwidth_tests = {
       end
       local not_present = string.match(modified_manifest, "BANDWIDTH=2000000") == nil
 
-      assert.is_true(not_present, "the rendtion 2000000 should not be present")
+      assert.is_true(not_present, "the rendition 2000000 should not be present")
       assert.is.equals(3, rendition_count, "there should have only three renditions where bitrate <= 1500000")
     end,
   },
@@ -48,7 +48,7 @@ local bandwidth_tests = {
       end
       local not_present = string.match(modified_manifest, "BANDWIDTH=2000000") == nil
 
-      assert.is_true(not_present, "the rendtion 2000000 should not be present")
+      assert.is_true(not_present, "the rendition 2000000 should not be present")
       assert.is.equals(1, rendition_count, "there should have only one rendition where bitrate = 1500000")
     end,
   },
@@ -60,7 +60,7 @@ local bandwidth_tests = {
         rendition_count = rendition_count + 1
       end
 
-      assert.is.equals(4, rendition_count, "there should have only one rendition where bitrate = 1500000")
+      assert.is.equals(4, rendition_count, "there should have all renditions")
     end,
   },
   {
@@ -71,7 +71,7 @@ local bandwidth_tests = {
         rendition_count = rendition_count + 1
       end
 
-      assert.is.equals(4, rendition_count, "there should have only one rendition where bitrate = 1500000")
+      assert.is.equals(4, rendition_count, "there should have all renditions")
     end,
   },
 }

@@ -6,13 +6,6 @@ RUN apt-get update \
     && mkdir /src \
     && cd /src \
     && git config --global url."https://".insteadOf git:// \
-    && luarocks install luasocket \
-    && luarocks install luacheck \
-    && luarocks install luacov \
     && luarocks install xml2lua \
-    && luarocks install luacov-coveralls \
-    && luarocks install busted \
     && rm -Rf /src
-
-CMD ["busted"]
 

@@ -76,23 +76,13 @@ hls.bandwidth = function(raw, context)
 end
 
 
--- hls_bandwidth_args - given a sub uri (the respective part for bandwidth b(x,y)) it returns the context
---  returns key/value tabel
-local hls_bandwidth_args = function(sub_uri)
-  local min, max = string.match(sub_uri, "(%d+),?(%d*)")
-  local context = {}
-  if min then context.min = tonumber(min) end
-  if max then context.max = tonumber(max) end
-  return context
-end
-
 -- a table containing all hls filters
 --
 -- do we need to care wether it's a variant or a master?
 -- do we care about the order?
 hls.filters = {
   -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
-  {name="bandwidth", filter=hls.bandwidth, match="b%(%d+,?%d*%)", context_args=hls_bandwidth_args},
+  {name="bandwidth", filter=hls.bandwidth},
 }
 
 return hls
