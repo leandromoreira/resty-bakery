@@ -3,7 +3,15 @@ local dash = {}
 local xml2lua = require "xml2lua"
 local handler = require "xmlhandler.tree"
 
-dash.video_representations_tags = function(manifest)
+-- has_bitrate - checks if the manifest has the bitrate
+--  returns a boolean
+dash.has_bitrate = function(manifest, bitrate)
+  return string.match(manifest, "bandwidth=\"" .. bitrate ..  "\"") ~= nil
+end
+
+-- video_renditions - returns the tag/metadata information about the renditions for a given manifest
+--  returns a table
+dash.video_renditions = function(manifest)
   local tags = {}
 
   for w in string.gmatch(manifest, "<Representation[^\n]+") do
@@ -40,7 +48,7 @@ dash.bandwidth = function(raw, context)
 
   -- if all renditions were filtered
   -- so we act safe returning the passed manifest
-  if #dash.video_representations_tags(modified_mpd) == 0 then
+  if #dash.video_renditions(modified_mpd) == 0 then
     return raw, nil
   end
 

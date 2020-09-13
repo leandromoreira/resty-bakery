@@ -27,6 +27,24 @@ local filter_out_hls = function(lines, filter_out_fn)
   return filtered_manifest
 end
 
+-- has_bitrate - checks if the manifest has the bitrate
+--  returns a boolean
+hls.has_bitrate = function(manifest, bitrate)
+  -- maybe we need to do bandwidth and BANDWIDTH
+  return string.match(manifest, "BANDWIDTH=" .. bitrate) ~= nil
+end
+
+-- video_renditions - returns the tag/metadata information about the renditions for a given manifest
+--  returns a table
+hls.video_renditions = function(manifest)
+  local video = {}
+  for w in string.gmatch(manifest, "(BANDWIDTH=%d+)") do
+    table.insert(video, w)
+  end
+
+  return video
+end
+
 -- filters based on bandwidth
 -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
 hls.bandwidth = function(raw, context)
@@ -61,17 +79,16 @@ hls.bandwidth = function(raw, context)
       end
     end
 
-
     return filter_out
   end)
 
-  -- all renditions were filtered
-  -- so we act safe returning the passed manifest
-  if #filtered_manifest <= 3 then
+
+  local raw_filtered_manifest = table.concat(filtered_manifest,"\n") .. "\n"
+  -- all renditions were filtered so we act safe returning the passed manifest
+  if #hls.video_renditions(raw_filtered_manifest) == 0 then
     return raw, nil
   end
 
-  local raw_filtered_manifest = table.concat(filtered_manifest,"\n") .. "\n"
   return raw_filtered_manifest, nil
 end
 
