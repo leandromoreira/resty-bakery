@@ -31,8 +31,8 @@ An Nginx+Lua library to modify media manifests like HLS and MPEG Dash, acting li
           ngx.req.set_uri(uri)
         }
 
-        # applying the filters (after the proxy/upstream has responded)
-        # here is where the magic happens
+        # applying the filters (after the proxy/upstream has replied)
+        # this is where the magic happens
         body_filter_by_lua_block {
           local modified_manifest = bakery.filter(ngx.var.original_uri, ngx.arg[1])
           ngx.arg[1] = modified_manifest
