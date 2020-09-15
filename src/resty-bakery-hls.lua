@@ -67,7 +67,7 @@ hls.bandwidth = function(raw, context)
     end
 
     if string.find(current_line, "bandwidth") then
-      local bandwidth_text = string.match(current_line, "bandwidth=(%d+),")
+      local bandwidth_text = string.match(current_line, "bandwidth=(%d+)") -- could be missing ,
 
       if bandwidth_text then
         local bandwidth_number = tonumber(bandwidth_text)
