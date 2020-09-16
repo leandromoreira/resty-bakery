@@ -3,6 +3,8 @@ version: '2.1'
 services:
   nginx:
     build: .
+      context: .
+      dockerfile: Dockerfile.dev
     volumes:
       - "./nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf"
       - "./src/:/lua/src/"

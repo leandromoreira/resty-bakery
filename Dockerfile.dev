@@ -8,7 +8,4 @@ RUN apt-get update \
     && git config --global url."https://".insteadOf git:// \
     && luarocks install xml2lua \
     && rm -Rf /src
-COPY ./nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
-COPY ./src /lua/src/
-COPY ./spec/manifests /media
-EXPOSE 8080
+
