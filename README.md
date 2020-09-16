@@ -1,8 +1,12 @@
 [![Build Status](https://travis-ci.org/leandromoreira/resty-bakery.svg?branch=master)](https://travis-ci.org/leandromoreira/resty-bakery) [![license](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)
 
-# Resty-Bakery [WIP] strongly inspired by [Bakery](https://github.com/cbsinteractive/bakery)
+# Resty-Bakery [WIP]
 
-An Nginx+Lua library to modify media manifests like HLS and MPEG Dash, acting like a proxy between (or in) the `frontend` and the `origin`, currently we're filtering:
+It's an Nginx+Lua library, strongly inspired by [Bakery](https://github.com/cbsinteractive/bakery), to modify media manifests on-the-fly, like [HLS](https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-07) and [MPEG Dash](https://en.wikipedia.org/wiki/Dynamic_Adaptive_Streaming_over_HTTP). It acts like a proxy between (or in) the `frontend` and your `origin`.
+
+This is very useful due to the fact that some [devices can't play with higher bitrate, multiple codecs, multiple frame frate](https://github.com/leandromoreira/http-video-streaming-troubleshooting) and so on.
+
+# Filters
 
 * [**Bandwidth**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md) (/path/to/media/f/`b(min,max)`/manifes.m3u8) - filters based on uri path following the format `b(min bandwidth, max bandwidth)`.
 * [**Framerate**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md) (/path/to/media/f/`fps(30,30000:1001)`/manifes.m3u8) - filters out based on uri path following the format `b(list of frame rates)`.
