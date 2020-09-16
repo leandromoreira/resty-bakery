@@ -113,55 +113,34 @@ hls.framerate = hls._create_filter_function(
     return response
   end
 )
-
 -- filters based on bandwidth
 -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
-hls.bandwidth = function(raw, context)
-  if not context.max or not context.min then
-    return raw, "no max or min were informed"
-  end
-
-  local manifest_lines = common.split(raw, "\n")
-  local filter_out = false
-  local skip_count = 0
-
-  local filtered_manifest = filter_out_hls(manifest_lines, function(current_line)
+hls.bandwidth = hls._create_filter_function(
+  common.preconditions.bandwidth,
+  -- Filter Out Predicate function
+  --  a function that given the current line and the context
+  --  it might skip and inform how many lines the filter should skip
+  function(current_line, ctx)
+    local response = {skip=false,count=0}
     current_line = string.lower(current_line)
-
-    -- we keep a skip counter so we can skip the bandwidth and its variant (rendition)
-    skip_count = skip_count - 1
-    if skip_count <= 0 then
-      skip_count = 0
-      filter_out = false
-    end
 
     -- make sure we're dealing only with rendition variant
     if string.find(current_line, "^#ext%-x%-stream%-inf") then
-      local bandwidth_text = string.match(current_line, "bandwidth=(%d+)") -- could be missing ,
+      local bandwidth_text = string.match(current_line, "bandwidth=(%d+)")
 
       if bandwidth_text then
         local bandwidth_number = tonumber(bandwidth_text)
 
-        if bandwidth_number < context.min or bandwidth_number > context.max then
-          filter_out = true
+        if bandwidth_number < ctx.min or bandwidth_number > ctx.max then
+          response.skip = true
           skip_count = 2
         end
       end
     end
 
-    return filter_out
-  end)
-
-
-  local raw_filtered_manifest = table.concat(filtered_manifest,"\n") .. "\n"
-  -- all renditions were filtered so we act safe returning the passed manifest
-  if #hls.video_renditions(raw_filtered_manifest) == 0 then
-    return raw, nil
+    return response
   end
-
-  return raw_filtered_manifest, nil
-end
-
+)
 
 -- a table containing all hls filters
 --

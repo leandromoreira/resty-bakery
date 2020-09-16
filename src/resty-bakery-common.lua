@@ -5,6 +5,10 @@ common.preconditions = {
   framerate=function(_, ctx)
     return ctx.fps and #ctx.fps > 0
   end,
+  -- min and max must be present
+  bandwidth=function(_, ctx)
+    return ctx.max and ctx.min
+  end,
 }
 
 -- split - splits a string by a separator

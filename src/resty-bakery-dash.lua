@@ -86,47 +86,19 @@ dash.framerate = dash._create_filter_function(
 
 -- filters based on bandwidth
 -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
-dash.bandwidth = function(raw, context)
-  if not context.max or not context.min then
-    return raw, "no max or min were informed"
-  end
-  local parser = xml2lua.parser(handler)
-  parser:parse(raw)
-
-  for _, as in ipairs(handler.root.MPD.Period.AdaptationSet) do
-    if as._attr.contentType == "video" then
-      for idx, r in ipairs(as.Representation) do
-        local bandwidth_number = tonumber(r._attr.bandwidth)
-        if bandwidth_number < context.min or bandwidth_number > context.max then
-          as.Representation[idx] = nil
-        end
+dash.bandwidth = dash._create_filter_function(
+  common.preconditions.bandwidth,
+  -- a function that receives all the video adaptation set and the context
+  -- so one can remove the unecessary nodes
+  function(as, ctx)
+    for idx, r in ipairs(as.Representation) do
+      local bandwidth_number = tonumber(r._attr.bandwidth)
+      if bandwidth_number < ctx.min or bandwidth_number > ctx.max then
+        as.Representation[idx] = nil
       end
     end
   end
-
-
-  local modified_mpd = xml2lua.toXml(handler.root, "XmlSSTartLua")
-
-  -- if all renditions were filtered
-  -- so we act safe returning the passed manifest
-  if #dash.video_renditions(modified_mpd) == 0 then
-    return raw, nil
-  end
-
-  -- we then remove the fake node required to transform
-  modified_mpd = string.gsub(modified_mpd, "<XmlSSTartLua>", "")
-  modified_mpd = string.gsub(modified_mpd, "</XmlSSTartLua>", "")
-  -- the way the lib transforms table to string xml adds double new lines
-  -- we remove them
-  modified_mpd = string.gsub(modified_mpd, "\n\n", "")
-  -- becase we remove the fake node we also introduced an unecessary new line
-  modified_mpd = string.gsub(modified_mpd, "\n", "", 1) -- removing the first (TODO: check if there's \n in the beginning)
-  -- the toXml also don't carry the <?xml> tag, then we prepend it
-  modified_mpd = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" .. modified_mpd -- TODO: get the first line from original?
-
-  return modified_mpd, nil
-end
-
+)
 
 -- a table containing all dash filters
 dash.filters = {
