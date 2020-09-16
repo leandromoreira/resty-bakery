@@ -101,3 +101,28 @@ variant_3.m3u8
   end)
 end)
 
+describe("Filter config", function()
+  local config = {
+    -- bitrate
+    {name="build a config for a minimum bitrate", filter="bandwidth", uri="/a/b(1000)/b/", expected={min=1000}},
+    {name="build a config for a min/max bitrate", filter="bandwidth", uri="/a/b(1000,2000)/b/", expected={min=1000,max=2000}},
+    {name="build an empty config for an empty bitrate", filter="bandwidth", uri="/a/b()/b/", expected={}},
+    -- framerate
+    {name="build a config for a single fps", filter="framerate", uri="/a/fps(30)/b/", expected={fps={"30"}}},
+    {name="build a config for a single float fps", filter="framerate", uri="/a/fps(29.970)/b/", expected={fps={"29.970"}}},
+    {name="build a config for a single fps in X/Y form", filter="framerate", uri="/a/fps(30000:1001)/b/", expected={fps={"30000/1001"}}},
+    {name="build a config for a multi fps", filter="framerate", uri="/a/fps(30,30000:1001,29.970)/b/", expected={fps={"30","30000/1001","29.970"}}},
+    {name="build an empty config for an empty fps", filter="framerate", uri="/a/fps()/b/", expected={fps={}}},
+  }
+
+  for _, test in ipairs(config) do
+    it(test.filter .. " :: " .. test.name, function()
+      -- we're similuating the main loop
+      -- TODO: create a function for it?
+      local sub_uri = string.match(test.uri, bakery.filters_config[test.filter].match)
+      local context = bakery.filters_config[test.filter].context_args(sub_uri)
+
+      assert.are.same(test.expected, context)
+    end)
+  end
+end)

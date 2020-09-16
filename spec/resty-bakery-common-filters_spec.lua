@@ -11,7 +11,12 @@ local helper = require "test-helper"
 --    * SOURCE_NAME refers to where the manifest where generated
 --    * TYPE should be dash, master, and variant
 --    * EXTENSION should be mpd, m3u8
-local manifest_set = {
+local generic_set = {
+  {name="Dash :: Generic", handler=dash, content=helper.content_from("spec/manifests/generic_dash.mpd")},
+  {name="HLS :: Generic", handler=hls, content=helper.content_from("spec/manifests/generic_master.m3u8")},
+}
+
+local bandwidth_set = {
   {name="Dash :: FFmpeg", handler=dash, content=helper.content_from("spec/manifests/ffmpeg_dash.mpd")},
   {name="HLS :: FFmpeg", handler=hls, content=helper.content_from("spec/manifests/ffmpeg_master.m3u8")},
 }
@@ -26,7 +31,7 @@ local bandwidth_tests = {
 }
 
 describe("Resty Bakery :: Bandwidth", function()
-  for _, manifest in ipairs(manifest_set) do
+  for _, manifest in ipairs(bandwidth_set) do
     describe(manifest.name, function()
       for _, test in ipairs(bandwidth_tests) do
         it(test.name, function()
@@ -40,6 +45,26 @@ describe("Resty Bakery :: Bandwidth", function()
             local present = manifest.handler.has_bitrate(modified_manifest, test.absent_bitrate)
             assert.is_false(present, "the rendition " .. test.absent_bitrate .. " should be absent")
           end
+        end)
+      end
+    end)
+  end
+end)
+
+local framerate_tests = {
+  {name="filters out the 30 fps renditions", context={fps={"30", "30/1"}}, expected_renditions=2},
+  {name="returns all renditions when all renditions were filtered", context={fps={"30","30/1","60","60/1"}}, expected_renditions=4},
+  {name="returns all renditions when no fps is given", context={}, expected_renditions=4},
+}
+describe("Resty Bakery :: Frame Rate", function()
+  for _, manifest in ipairs(generic_set) do
+    describe(manifest.name, function()
+      for _, test in ipairs(framerate_tests) do
+        it(test.name, function()
+          local modified_manifest = manifest.handler.framerate(manifest.content, test.context)
+
+          local rendition_count = #manifest.handler.video_renditions(modified_manifest)
+          assert.is.equals(test.expected_renditions, rendition_count, "there should have " .. test.expected_renditions .. " renditions")
         end)
       end
     end)

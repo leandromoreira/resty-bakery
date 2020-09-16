@@ -1,5 +1,6 @@
 local dash = {}
 
+local common = require "resty-bakery-common"
 local xml2lua = require "xml2lua"
 local handler = require "xmlhandler.tree"
 
@@ -22,6 +23,66 @@ dash.video_renditions = function(manifest)
 
   return tags
 end
+
+-- _create_filter_function - builds a filter function based on
+--   precondition - a function to validate the context
+--   iterator - an adaptation set video iterator for the actuall filtering
+dash._create_filter_function = function(precondition, iterator)
+  return function(raw, ctx)
+    if not precondition(raw, ctx) then
+      return raw, nil
+    end
+    local parser = xml2lua.parser(handler)
+    parser:parse(raw)
+
+    for _, as in ipairs(handler.root.MPD.Period.AdaptationSet) do
+      if as._attr.contentType == "video" then
+        iterator(as, ctx)
+      end
+    end
+
+    -- we need to attach some root fake node to parse
+    -- the table to string
+    local modified_mpd = xml2lua.toXml(handler.root, "XmlSSTartLua")
+
+    -- if all renditions were filtered
+    -- so we act safe returning the passed manifest
+    if #dash.video_renditions(modified_mpd) == 0 then
+      return raw, nil
+    end
+
+  -- we then remove the fake node required to transform
+  modified_mpd = string.gsub(modified_mpd, "<XmlSSTartLua>", "")
+  modified_mpd = string.gsub(modified_mpd, "</XmlSSTartLua>", "")
+  -- the way the lib transforms table to string xml adds double new lines
+  -- we remove them
+  modified_mpd = string.gsub(modified_mpd, "\n\n", "")
+  -- becase we remove the fake node we also introduced an unecessary new line
+  modified_mpd = string.gsub(modified_mpd, "\n", "", 1) -- removing the first (TODO: check if there's \n in the beginning)
+  -- the toXml also don't carry the <?xml> tag, then we prepend it
+  modified_mpd = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" .. modified_mpd -- TODO: get the first line from original?
+
+    return modified_mpd, nil
+  end
+end
+
+-- filters based on frame rate
+-- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md
+dash.framerate = dash._create_filter_function(
+  common.preconditions.framerate,
+  -- a function that receives all the video adaptation set and the context
+  -- so one can remove the unecessary nodes
+  function(as, ctx)
+    for idx, r in ipairs(as.Representation) do
+      for _, fps in ipairs(ctx.fps) do
+        if fps == r._attr.frameRate then
+          as.Representation[idx] = nil
+          break
+        end
+      end
+    end
+  end
+)
 
 -- filters based on bandwidth
 -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
@@ -52,11 +113,16 @@ dash.bandwidth = function(raw, context)
     return raw, nil
   end
 
+  -- we then remove the fake node required to transform
   modified_mpd = string.gsub(modified_mpd, "<XmlSSTartLua>", "")
   modified_mpd = string.gsub(modified_mpd, "</XmlSSTartLua>", "")
+  -- the way the lib transforms table to string xml adds double new lines
+  -- we remove them
   modified_mpd = string.gsub(modified_mpd, "\n\n", "")
+  -- becase we remove the fake node we also introduced an unecessary new line
   modified_mpd = string.gsub(modified_mpd, "\n", "", 1) -- removing the first (TODO: check if there's \n in the beginning)
-  modified_mpd = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" .. modified_mpd -- get the first line from original?
+  -- the toXml also don't carry the <?xml> tag, then we prepend it
+  modified_mpd = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" .. modified_mpd -- TODO: get the first line from original?
 
   return modified_mpd, nil
 end
@@ -66,6 +132,8 @@ end
 dash.filters = {
   -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
   {name="bandwidth", filter=dash.bandwidth},
+  -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md
+  {name="framerate", filter=dash.framerate},
 }
 
 return dash
