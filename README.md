@@ -2,9 +2,9 @@
 
 # Resty-Bakery [WIP]
 
-It's an Nginx+Lua library, strongly inspired by [the CBS Bakery](https://github.com/cbsinteractive/bakery), to modify media manifests on-the-fly, like [HLS](https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-07) and [MPEG Dash](https://en.wikipedia.org/wiki/Dynamic_Adaptive_Streaming_over_HTTP). It acts like a proxy between (or in) the `frontend` and your `origin`.
+It's a Nginx+Lua library, strongly inspired by [the CBS Bakery](https://github.com/cbsinteractive/bakery), to modify media manifests on-the-fly, like [HLS](https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-07) and [MPEG Dash](https://en.wikipedia.org/wiki/Dynamic_Adaptive_Streaming_over_HTTP). It acts as a proxy between (or in) the `frontend` and your `origin`.
 
-This is very useful due to the fact that some [devices can't play with higher bitrate, multiple codecs, multiple frame frate](https://github.com/leandromoreira/http-video-streaming-troubleshooting) and so on.
+This is very useful due to the fact that some [devices can't play with a higher bitrate, multiple codecs, multiple frame rate](https://github.com/leandromoreira/http-video-streaming-troubleshooting), and so on.
 
 # Filters
 
