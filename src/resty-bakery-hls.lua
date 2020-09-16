@@ -135,7 +135,8 @@ hls.bandwidth = function(raw, context)
       filter_out = false
     end
 
-    if string.find(current_line, "bandwidth") then
+    -- make sure we're dealing only with rendition variant
+    if string.find(current_line, "^#ext%-x%-stream%-inf") then
       local bandwidth_text = string.match(current_line, "bandwidth=(%d+)") -- could be missing ,
 
       if bandwidth_text then

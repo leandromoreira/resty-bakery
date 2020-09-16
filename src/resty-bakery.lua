@@ -47,7 +47,7 @@ bakery.filters_config = {
   -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
   bandwidth={match="b%(%d+,?%d*%)", context_args=bandwidth_args},
   -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md
-  framerate={match="fps%((.+)%)", context_args=framerate_args},
+  framerate={match="fps%(([%d.:,]+)%)", context_args=framerate_args},
 }
 
 

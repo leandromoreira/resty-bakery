@@ -61,6 +61,10 @@ curl -v "http://localhost:8080/media/b(1500000)/ffmpeg_dash.mpd"
 curl -v "http://localhost:8080/media/b(0,1500000)/ffmpeg_master.m3u8"
 curl -v "http://localhost:8080/media/b(0,1500000)/ffmpeg_dash.mpd"
 
+# filters bandwidth > 800000 and excludes frame rate 60
+curl "http://localhost:8080/media/b(800000)fps(60)/generic_master.m3u8"
+curl "http://localhost:8080/media/b(800000)fps(60,60:1)/generic_dash.mpd"
+
 
 # PS: there is an mmedia location just to provide manifests without
 # data transfer them in chunked encoding mechanism
