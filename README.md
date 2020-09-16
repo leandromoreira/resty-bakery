@@ -6,11 +6,6 @@ It's a Nginx+Lua library, strongly inspired by [the CBS Bakery](https://github.c
 
 This is very useful due to the fact that some [devices can't play with a higher bitrate, multiple codecs, multiple frame rate](https://github.com/leandromoreira/http-video-streaming-troubleshooting), and so on.
 
-# Filters
-
-* [**Bandwidth**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md) (/path/to/media/f/`b(min,max)`/manifes.m3u8) - filters based on uri path following the format `b(min bandwidth, max bandwidth)`.
-* [**Framerate**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md) (/path/to/media/f/`fps(30,30000:1001)`/manifes.m3u8) - filters out based on uri path following the format `b(list of frame rates)`.
-
 # Getting started
 
 ```bash
@@ -23,6 +18,11 @@ curl "http://localhost:8080/media/generic_master.m3u8"
 # fetch renditions (variants) with bandwidth >= 800000 and with frame rate = 60 or 60/1
 curl "http://localhost:8080/media/b(800000)fps(60,60:1)/generic_master.m3u8"
 ```
+
+# Filters
+
+* [**Bandwidth**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md) (/path/to/media/f/`b(min,max)`/manifes.m3u8) - filters based on uri path following the format `b(min bandwidth, max bandwidth)`.
+* [**Framerate**](https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md) (/path/to/media/f/`fps(30,30000:1001)`/manifes.m3u8) - filters out based on uri path following the format `b(list of frame rates)`.
 
 # Nginx usage example
 
