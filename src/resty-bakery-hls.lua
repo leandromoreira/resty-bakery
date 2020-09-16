@@ -2,20 +2,6 @@ local hls = {}
 
 local common = require "resty-bakery-common"
 
--- filter_out_hls - filters out lines from an hls manifest based on a function
---  returns a table
-local filter_out_hls = function(lines, filter_out_fn)
-  local filtered_manifest = {}
-
-  for _, line in ipairs(lines) do
-    if not filter_out_fn(line) then
-      table.insert(filtered_manifest, line)
-    end
-  end
-
-  return filtered_manifest
-end
-
 -- filter_out_hls_with_skip - filters out lines from an hls manifest based on a function
 --  returns a table containing information
 --    skip - should we skip or not
@@ -133,7 +119,7 @@ hls.bandwidth = hls._create_filter_function(
 
         if bandwidth_number < ctx.min or bandwidth_number > ctx.max then
           response.skip = true
-          skip_count = 2
+          response.count = 2
         end
       end
     end
