@@ -11,7 +11,7 @@ services:
       - "8080:8080"
 
   test:
-    command: busted -c
+    command: busted -c --shuffle
     build:
       context: .
       dockerfile: Dockerfile.test
