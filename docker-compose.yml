@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   nginx:
-    build: .
+    build:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
