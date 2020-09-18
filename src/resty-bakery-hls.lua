@@ -56,7 +56,7 @@ end
 hls._create_filter_function = function(precondition, predicate)
   return function(raw, ctx)
     if not precondition(raw, ctx) then
-      return raw, nil
+      return raw, "did not meet the context precondition."
     end
     local manifest_lines = common.split(raw, "\n")
     local filtered_manifest = filter_out_hls_with_skip(manifest_lines, ctx, predicate)
@@ -64,7 +64,7 @@ hls._create_filter_function = function(precondition, predicate)
 
     -- all renditions were filtered so we act safe returning the passed manifest
     if #hls.video_renditions(raw_filtered_manifest) == 0 then
-      return raw, nil
+      return raw, "all renditions would be filtered, some filter(s) hasnt been applied."
     end
 
     return raw_filtered_manifest, nil

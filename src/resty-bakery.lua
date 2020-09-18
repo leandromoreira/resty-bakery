@@ -15,11 +15,13 @@ end
 
 
 -- filter - filters the body (an hls or dash manifest) given an uri
---  returns a string
+--  returns a string and an error table
 --
 -- it chains all filters, passing the filtered body to the next filter
 bakery.filter = function(uri, body)
   local filters = bakery.filters_by(uri)
+  local errors = {}
+  local err
 
   for _, filter in ipairs(filters) do
     local sub_uri = string.match(uri, common.config[filter.name].match)
@@ -28,11 +30,13 @@ bakery.filter = function(uri, body)
       -- and when an error happens the
       -- filters should return the unmodified body
       local context = common.config[filter.name].get_args(sub_uri)
-      body = filter.filter(body, context)
+      body, err = filter.filter(body, context)
+
+      if err then table.insert(errors, err) end
     end
   end
 
-  return body
+  return body, errors
 end
 
 return bakery

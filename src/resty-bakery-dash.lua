@@ -30,7 +30,7 @@ end
 dash._create_filter_function = function(precondition, iterator)
   return function(raw, ctx)
     if not precondition(raw, ctx) then
-      return raw, nil
+      return raw, "did not meet the context precondition."
     end
     local parser = xml2lua.parser(handler)
     parser:parse(raw)
@@ -48,7 +48,7 @@ dash._create_filter_function = function(precondition, iterator)
     -- if all renditions were filtered
     -- so we act safe returning the passed manifest
     if #dash.video_renditions(modified_mpd) == 0 then
-      return raw, nil
+      return raw, "all renditions would be filtered, some filter(s) hasnt been applied."
     end
 
   -- we then remove the fake node required to transform
