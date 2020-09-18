@@ -50,18 +50,22 @@ bakery.filters_config = {
   framerate={match="fps%(([%d.:,]+)%)", context_args=framerate_args},
 }
 
+bakery.filters_by = function(uri)
+  if string.match(uri, ".m3u8") then
+    return hls.filters
+  elseif string.match(uri, ".mpd") then
+    return dash.filters
+  end
+  return {}
+end
+
 
 -- filter - filters the body (an hls or dash manifest) given an uri
 --  returns a string
 --
 -- it chains all filters, passing the filtered body to the next filter
 bakery.filter = function(uri, body)
-  local filters = {}
-  if string.match(uri, ".m3u8") then
-    filters = hls.filters
-  elseif string.match(uri, ".mpd") then
-    filters = dash.filters
-  end
+  local filters = bakery.filters_by(uri)
 
   for _, v in ipairs(filters) do
     local sub_uri = string.match(uri, bakery.filters_config[v.name].match)
