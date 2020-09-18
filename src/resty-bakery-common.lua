@@ -24,5 +24,38 @@ common.split = function(inputstr, sep)
   return t
 end
 
+local bandwidth_args= function(sub_uri)
+  local context = {}
+  if not sub_uri then
+    return context
+  end
+  local min, max = string.match(sub_uri, "(%d+),?(%d*)")
+  if min then context.min = tonumber(min) end
+  if max then context.max = tonumber(max) end
+  return context
+end
+
+local framerate_args= function(sub_uri)
+  local context = {fps={}}
+  if sub_uri == nil then
+    return context
+  end
+  local framerates = common.split(sub_uri, ",")
+
+  for _, fps in ipairs(framerates) do
+    -- we transfor uri X:Y (uri compatible) to X/Y (dash compatible)
+    fps, _ = string.gsub(fps, ":", "/")
+    table.insert(context.fps, fps)
+  end
+
+  return context
+end
+
+common.config = {
+  -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/bandwidth.md
+  bandwidth={match="b%(%d+,?%d*%)", get_args=bandwidth_args},
+  -- https://github.com/cbsinteractive/bakery/blob/master/docs/filters/frame-rate.md
+  framerate={match="fps%(([%d.:,]+)%)", get_args=framerate_args},
+}
 
 return common
