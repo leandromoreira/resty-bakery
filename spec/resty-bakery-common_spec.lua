@@ -5,7 +5,7 @@ local common = require "resty-bakery-common"
 describe("Filter config", function()
   local config = {
     -- bitrate
-    {name="build a config for a minimum bitrate", filter="bandwidth", uri="/a/b(1000)/b/", expected={min=1000}},
+    {name="build a config for a minimum bitrate", filter="bandwidth", uri="/a/b(1000)/b/", expected={min=1000, max=math.huge}},
     {name="build a config for a min/max bitrate", filter="bandwidth", uri="/a/b(1000,2000)/b/", expected={min=1000,max=2000}},
     {name="build an empty config for an empty bitrate", filter="bandwidth", uri="/a/b()/b/", expected={}},
     {name="build a config for a min/max bitrate with multiple filters", filter="bandwidth", uri="/a/b(1000,2000)fps(60)/b/", expected={min=1000,max=2000}},

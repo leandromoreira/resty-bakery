@@ -32,6 +32,10 @@ local bandwidth_args= function(sub_uri)
   local min, max = string.match(sub_uri, "(%d+),?(%d*)")
   if min then context.min = tonumber(min) end
   if max then context.max = tonumber(max) end
+
+  if not context.max then context.max = math.huge end
+  if not context.min then context.min = 0 end
+
   return context
 end
 
