@@ -9,7 +9,7 @@ RUN apt-get update \
     && luarocks install luasocket \
     && luarocks install luacheck \
     && luarocks install luacov \
-    && luarocks install xml2lua \
+    && luarocks install xml2lua 1.4-3 \
     && luarocks install luacov-coveralls \
     && luarocks install busted \
     && rm -Rf /src
