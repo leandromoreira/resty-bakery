@@ -60,7 +60,7 @@ hls._create_filter_function = function(precondition, predicate)
     end
     local manifest_lines = common.split(raw, "\n")
     local filtered_manifest = filter_out_hls_with_skip(manifest_lines, ctx, predicate)
-    local raw_filtered_manifest = table.concat(filtered_manifest,"\n") .. "\n"
+    local raw_filtered_manifest = table.concat(filtered_manifest,"\n") .. "\r"
 
     -- all renditions were filtered so we act safe returning the passed manifest
     if #hls.video_renditions(raw_filtered_manifest) == 0 then
